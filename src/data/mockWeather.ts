@@ -33,6 +33,34 @@ export const mockWeather: WeatherData = {
   },
 };
 
-export function getWeatherByHarbor(harborId: string) {
-  return mockWeather.harbors[harborId];
+export interface HarborWeather {
+  temperature: number;
+  weather: string;
+  waveHeight: number;
+  windSpeed: number;
+  windDirection: string;
+  visibility: number;
+  safetyLevel: 'good' | 'caution' | 'warning' | 'danger';
+  advisory?: string;
+}
+
+export function getWeatherByHarbor(harborId: string): HarborWeather | null {
+  const harborData = mockWeather.harbors[harborId];
+  if (!harborData) return null;
+
+  // 현재 날씨에 항구별 데이터 병합
+  return {
+    temperature: mockWeather.current.temperature,
+    weather: mockWeather.current.weather,
+    waveHeight: harborData.waveHeight,
+    windSpeed: harborData.windSpeed,
+    windDirection: mockWeather.current.windDirection,
+    visibility: 10, // km
+    safetyLevel: harborData.safetyLevel,
+    advisory: harborData.safetyLevel === 'warning'
+      ? '풍랑주의보 발효 중'
+      : harborData.safetyLevel === 'caution'
+        ? '출항 시 주의 필요'
+        : undefined,
+  };
 }
