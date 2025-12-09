@@ -37,7 +37,7 @@ export interface User {
   name: string;
   phone?: string;
   harbor: Harbor;
-  vessel: Vessel;
+  vessel?: Vessel;
   age: number;
   healthConditions?: string[];
   emergencyContacts?: EmergencyContact[];
