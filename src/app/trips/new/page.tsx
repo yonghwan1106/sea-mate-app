@@ -6,13 +6,15 @@ import Link from 'next/link';
 import { ArrowLeft, Ship, MapPin, Clock, Users, Check } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useAppStore } from '@/store/appStore';
-import { mockHarbors } from '@/data/mockHarbors';
+import { useToastStore } from '@/store/toastStore';
 import { mockUsers } from '@/data/mockUsers';
+import { cn } from '@/lib/utils';
 
 export default function NewTripPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { addTrip, addNotification } = useAppStore();
+  const { addToast } = useToastStore();
 
   const [destination, setDestination] = useState('');
   const [departureDate, setDepartureDate] = useState('');
@@ -24,14 +26,47 @@ export default function NewTripPage() {
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // 동료 목록 (현재 사용자 제외)
   const availableBuddies = mockUsers.filter(
     (u) => u.role === 'fisher' && u.id !== user?.id
   );
 
+  // 입력 검증
+  const validateForm = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!destination.trim()) {
+      newErrors.destination = '목적지를 입력해주세요';
+    }
+    if (!departureDate) {
+      newErrors.departureDate = '출항 날짜를 선택해주세요';
+    }
+    if (!departureTime) {
+      newErrors.departureTime = '출항 시간을 선택해주세요';
+    }
+
+    // 귀항 일시가 출항 일시보다 이전인지 검증
+    if (departureDate && departureTime && expectedReturnDate && expectedReturnTime) {
+      const departure = new Date(`${departureDate}T${departureTime}`);
+      const returnDt = new Date(`${expectedReturnDate}T${expectedReturnTime}`);
+      if (returnDt <= departure) {
+        newErrors.expectedReturn = '예상 귀항 시간은 출항 시간 이후여야 합니다';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async () => {
-    if (!destination.trim() || !departureDate || !departureTime || !user) return;
+    if (!user) return;
+
+    if (!validateForm()) {
+      addToast({ type: 'error', message: '입력 정보를 확인해주세요' });
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -71,6 +106,7 @@ export default function NewTripPage() {
       });
     }
 
+    addToast({ type: 'success', message: '출항이 등록되었습니다!' });
     setShowSuccess(true);
     setTimeout(() => {
       router.push('/trips');
@@ -134,10 +170,18 @@ export default function NewTripPage() {
           <input
             type="text"
             value={destination}
-            onChange={(e) => setDestination(e.target.value)}
+            onChange={(e) => {
+              setDestination(e.target.value);
+              if (errors.destination) setErrors((prev) => ({ ...prev, destination: '' }));
+            }}
             placeholder="예: 거제도 동쪽 해역"
-            className="input-lg"
+            className={cn('input-lg', errors.destination && 'input-error')}
+            aria-invalid={!!errors.destination}
+            aria-describedby={errors.destination ? 'destination-error' : undefined}
           />
+          {errors.destination && (
+            <p id="destination-error" className="error-message">{errors.destination}</p>
+          )}
         </div>
 
         {/* 출항 일시 */}
@@ -150,19 +194,33 @@ export default function NewTripPage() {
             <input
               type="date"
               value={departureDate}
-              onChange={(e) => setDepartureDate(e.target.value)}
+              onChange={(e) => {
+                setDepartureDate(e.target.value);
+                if (errors.departureDate) setErrors((prev) => ({ ...prev, departureDate: '' }));
+              }}
               min={today}
-              className="input-lg"
+              className={cn('input-lg', errors.departureDate && 'input-error')}
+              aria-invalid={!!errors.departureDate}
             />
+            {errors.departureDate && (
+              <p className="error-message">{errors.departureDate}</p>
+            )}
           </div>
           <div>
             <label className="label">출항 시간</label>
             <input
               type="time"
               value={departureTime}
-              onChange={(e) => setDepartureTime(e.target.value)}
-              className="input-lg"
+              onChange={(e) => {
+                setDepartureTime(e.target.value);
+                if (errors.departureTime) setErrors((prev) => ({ ...prev, departureTime: '' }));
+              }}
+              className={cn('input-lg', errors.departureTime && 'input-error')}
+              aria-invalid={!!errors.departureTime}
             />
+            {errors.departureTime && (
+              <p className="error-message">{errors.departureTime}</p>
+            )}
           </div>
         </div>
 
@@ -173,9 +231,12 @@ export default function NewTripPage() {
             <input
               type="date"
               value={expectedReturnDate}
-              onChange={(e) => setExpectedReturnDate(e.target.value)}
+              onChange={(e) => {
+                setExpectedReturnDate(e.target.value);
+                if (errors.expectedReturn) setErrors((prev) => ({ ...prev, expectedReturn: '' }));
+              }}
               min={departureDate || today}
-              className="input-lg"
+              className={cn('input-lg', errors.expectedReturn && 'input-error')}
             />
           </div>
           <div>
@@ -183,11 +244,17 @@ export default function NewTripPage() {
             <input
               type="time"
               value={expectedReturnTime}
-              onChange={(e) => setExpectedReturnTime(e.target.value)}
-              className="input-lg"
+              onChange={(e) => {
+                setExpectedReturnTime(e.target.value);
+                if (errors.expectedReturn) setErrors((prev) => ({ ...prev, expectedReturn: '' }));
+              }}
+              className={cn('input-lg', errors.expectedReturn && 'input-error')}
             />
           </div>
         </div>
+        {errors.expectedReturn && (
+          <p className="error-message -mt-4">{errors.expectedReturn}</p>
+        )}
 
         {/* 승선 인원 */}
         <div>

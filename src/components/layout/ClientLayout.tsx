@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import Header from './Header';
 import BottomNav from './BottomNav';
+import ToastContainer from '@/components/ui/Toast';
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -32,6 +33,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
+      <ToastContainer />
       <Header isAdmin={isAdminPage} />
       <main className="flex-1 pb-20 overflow-y-auto">
         <div className="max-w-lg mx-auto">

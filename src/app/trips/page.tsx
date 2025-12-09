@@ -1,23 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, Ship, Clock, CheckCircle2, AlertCircle, MapPin, Calendar } from 'lucide-react';
+import { Plus, Ship, Clock, CheckCircle2, AlertCircle, Calendar } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { useAuthStore } from '@/store/authStore';
+import { useToastStore } from '@/store/toastStore';
 import { formatRelativeTime, formatDate } from '@/lib/utils';
 import { TripStatus } from '@/types';
 
 export default function TripsPage() {
-  const { user } = useAuthStore();
-  const { trips, updateTripStatus, addCheckin } = useAppStore();
+  const { user, updatePoints } = useAuthStore();
+  const { trips, updateTripStatus, addCheckin, addNotification } = useAppStore();
+  const { addToast } = useToastStore();
   const [filter, setFilter] = useState<TripStatus | 'all'>('all');
 
-  // 현재 사용자의 출항만 필터링 (데모에서는 전체 표시)
-  const filteredTrips = trips.filter((trip) => {
-    if (filter !== 'all' && trip.status !== filter) return false;
-    return true;
-  });
+  // 필터링된 출항 목록 (useMemo로 최적화)
+  const filteredTrips = useMemo(() => {
+    return trips.filter((trip) => {
+      if (filter !== 'all' && trip.status !== filter) return false;
+      return true;
+    });
+  }, [trips, filter]);
 
   const statusConfig: Record<TripStatus, { label: string; color: string; icon: typeof Ship }> = {
     scheduled: { label: '예정', color: 'bg-gray-100 text-gray-700', icon: Calendar },
@@ -32,10 +36,24 @@ export default function TripsPage() {
 
   const handleCheckin = (tripId: string) => {
     addCheckin(tripId);
+    updatePoints(50);
+    addToast({ type: 'success', message: '체크인 완료! +50P 적립' });
+    addNotification({
+      type: 'point_earned',
+      title: '포인트 적립',
+      message: '체크인으로 50포인트가 적립되었습니다.',
+    });
   };
 
   const handleComplete = (tripId: string) => {
     updateTripStatus(tripId, 'completed');
+    updatePoints(300);
+    addToast({ type: 'success', message: '무사 귀항! +300P 적립' });
+    addNotification({
+      type: 'point_earned',
+      title: '포인트 적립',
+      message: '무사 귀항으로 300포인트가 적립되었습니다.',
+    });
   };
 
   return (

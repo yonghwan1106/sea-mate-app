@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, AlertTriangle, Heart, MessageCircle, Filter, MapPin } from 'lucide-react';
+import { Plus, AlertTriangle, AlertCircle, CheckCircle, Info, Heart, MessageCircle, Filter, MapPin } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { formatRelativeTime, getRiskTypeText, getSeverityText } from '@/lib/utils';
 import { RiskType, Severity } from '@/types';
@@ -13,12 +13,29 @@ export default function RiskReportsPage() {
   const [filterSeverity, setFilterSeverity] = useState<Severity | 'all'>('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  // 필터링된 위험정보
-  const filteredReports = riskReports.filter((report) => {
-    if (filterType !== 'all' && report.type !== filterType) return false;
-    if (filterSeverity !== 'all' && report.severity !== filterSeverity) return false;
-    return true;
-  });
+  // 필터링된 위험정보 (useMemo로 최적화)
+  const filteredReports = useMemo(() => {
+    return riskReports.filter((report) => {
+      if (filterType !== 'all' && report.type !== filterType) return false;
+      if (filterSeverity !== 'all' && report.severity !== filterSeverity) return false;
+      return true;
+    });
+  }, [riskReports, filterType, filterSeverity]);
+
+  // 위험도 아이콘 헬퍼
+  const getSeverityIcon = (severity: Severity) => {
+    switch (severity) {
+      case 'critical':
+        return <AlertTriangle size={20} className="text-danger-600" aria-hidden="true" />;
+      case 'high':
+        return <AlertCircle size={20} className="text-accent-600" aria-hidden="true" />;
+      case 'medium':
+        return <Info size={20} className="text-warning-600" aria-hidden="true" />;
+      case 'low':
+      default:
+        return <CheckCircle size={20} className="text-gray-600" aria-hidden="true" />;
+    }
+  };
 
   const riskTypes: { value: RiskType | 'all'; label: string }[] = [
     { value: 'all', label: '전체' },
@@ -112,12 +129,7 @@ export default function RiskReportsPage() {
                     report.severity === 'medium' ? 'bg-warning-100' :
                     'bg-gray-100'
                   }`}>
-                    <AlertTriangle size={20} className={
-                      report.severity === 'critical' ? 'text-danger-600' :
-                      report.severity === 'high' ? 'text-accent-600' :
-                      report.severity === 'medium' ? 'text-warning-600' :
-                      'text-gray-600'
-                    } />
+                    {getSeverityIcon(report.severity)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">

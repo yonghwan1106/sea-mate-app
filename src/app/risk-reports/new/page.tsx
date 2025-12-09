@@ -6,13 +6,16 @@ import { ArrowLeft, MapPin, Camera, AlertTriangle, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { useAppStore } from '@/store/appStore';
+import { useToastStore } from '@/store/toastStore';
 import { RiskType, Severity } from '@/types';
 import { mockHarbors } from '@/data/mockHarbors';
+import { cn } from '@/lib/utils';
 
 export default function NewRiskReportPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, updatePoints } = useAuthStore();
   const { addRiskReport, addNotification } = useAppStore();
+  const { addToast } = useToastStore();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -21,6 +24,7 @@ export default function NewRiskReportPage() {
   const [locationId, setLocationId] = useState(user?.harbor.id || 'harbor-001');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const riskTypes: { value: RiskType; label: string; icon: string }[] = [
     { value: 'weather', label: '기상', icon: '🌧️' },
@@ -37,8 +41,28 @@ export default function NewRiskReportPage() {
     { value: 'critical', label: '심각', color: 'bg-danger-100 border-danger-300 text-danger-700', desc: '즉시 대피' },
   ];
 
+  // 입력 검증
+  const validateForm = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!title.trim()) {
+      newErrors.title = '제목을 입력해주세요';
+    }
+    if (!description.trim()) {
+      newErrors.description = '상세 설명을 입력해주세요';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async () => {
-    if (!title.trim() || !description.trim() || !user) return;
+    if (!user) return;
+
+    if (!validateForm()) {
+      addToast({ type: 'error', message: '입력 정보를 확인해주세요' });
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -54,6 +78,9 @@ export default function NewRiskReportPage() {
       author: user,
     });
 
+    // 포인트 적립
+    updatePoints(100);
+
     // 포인트 알림
     addNotification({
       type: 'point_earn',
@@ -61,6 +88,8 @@ export default function NewRiskReportPage() {
       message: '위험정보 공유로 100포인트가 적립되었습니다!',
       link: '/points',
     });
+
+    addToast({ type: 'success', message: '위험정보가 등록되었습니다! +100P' });
 
     // 성공 표시
     setShowSuccess(true);
@@ -153,12 +182,23 @@ export default function NewRiskReportPage() {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (errors.title) setErrors((prev) => ({ ...prev, title: '' }));
+            }}
             placeholder="예: 동쪽 해역 강풍 주의"
-            className="input-lg"
+            className={cn('input-lg', errors.title && 'input-error')}
             maxLength={50}
+            aria-invalid={!!errors.title}
           />
-          <p className="text-sm text-gray-400 mt-1">{title.length}/50</p>
+          <div className="flex justify-between mt-1">
+            {errors.title ? (
+              <p className="error-message">{errors.title}</p>
+            ) : (
+              <span />
+            )}
+            <p className="text-sm text-gray-400">{title.length}/50</p>
+          </div>
         </div>
 
         {/* 상세 설명 */}
@@ -166,12 +206,23 @@ export default function NewRiskReportPage() {
           <label className="label">상세 설명</label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              if (errors.description) setErrors((prev) => ({ ...prev, description: '' }));
+            }}
             placeholder="위험 상황을 자세히 설명해주세요..."
-            className="input-lg min-h-[120px] resize-none"
+            className={cn('input-lg min-h-[120px] resize-none', errors.description && 'input-error')}
             maxLength={500}
+            aria-invalid={!!errors.description}
           />
-          <p className="text-sm text-gray-400 mt-1">{description.length}/500</p>
+          <div className="flex justify-between mt-1">
+            {errors.description ? (
+              <p className="error-message">{errors.description}</p>
+            ) : (
+              <span />
+            )}
+            <p className="text-sm text-gray-400">{description.length}/500</p>
+          </div>
         </div>
 
         {/* 위치 */}

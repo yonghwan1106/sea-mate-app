@@ -95,6 +95,7 @@ const config: Config = {
       spacing: {
         'touch': '48px',
         'touch-lg': '64px',
+        'safe-bottom': 'env(safe-area-inset-bottom, 0px)',
       },
       borderRadius: {
         'xl': '1rem',

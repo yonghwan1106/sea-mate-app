@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
+  AlertCircle,
   Ship,
   Users,
   Phone,
@@ -13,13 +14,17 @@ import {
   MapPin,
   Wind,
   Waves,
-  Thermometer
+  Thermometer,
+  CheckCircle,
+  XCircle,
+  Info
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useAppStore } from '@/store/appStore';
 import { getWeatherByHarbor } from '@/data/mockWeather';
 import { formatRelativeTime, getSafetyLevelText } from '@/lib/utils';
 import { mockUsers } from '@/data/mockUsers';
+import { Severity, SafetyLevel } from '@/types';
 
 export default function HomePage() {
   const { user, login } = useAuthStore();
@@ -46,6 +51,38 @@ export default function HomePage() {
   // 진행 중인 출항
   const activeTrips = trips.filter((t) => t.status === 'sailing');
 
+  // 지연/SOS 출항
+  const urgentTrips = trips.filter((t) => t.status === 'overdue' || t.status === 'sos');
+
+  // 위험도 아이콘 헬퍼
+  const getSeverityIcon = (severity: Severity) => {
+    switch (severity) {
+      case 'critical':
+        return <AlertTriangle size={20} className="text-danger-600" aria-hidden="true" />;
+      case 'high':
+        return <AlertCircle size={20} className="text-accent-600" aria-hidden="true" />;
+      case 'medium':
+        return <Info size={20} className="text-warning-600" aria-hidden="true" />;
+      case 'low':
+      default:
+        return <CheckCircle size={20} className="text-gray-600" aria-hidden="true" />;
+    }
+  };
+
+  // 안전등급 아이콘 헬퍼
+  const getSafetyIcon = (level: SafetyLevel) => {
+    switch (level) {
+      case 'good':
+        return <CheckCircle size={18} className="text-white" aria-hidden="true" />;
+      case 'caution':
+        return <AlertCircle size={18} className="text-white" aria-hidden="true" />;
+      case 'warning':
+        return <AlertTriangle size={18} className="text-white" aria-hidden="true" />;
+      case 'danger':
+        return <XCircle size={18} className="text-white" aria-hidden="true" />;
+    }
+  };
+
   if (!isReady) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -59,7 +96,7 @@ export default function HomePage() {
 
   return (
     <div className="px-4 py-6 space-y-6">
-      {/* 인사말 & 현재 위치 */}
+      {/* 1. 인사말 & 포인트 */}
       <section>
         <div className="flex items-start justify-between">
           <div>
@@ -67,28 +104,90 @@ export default function HomePage() {
               안녕하세요, {currentUser.name}님
             </h2>
             <div className="flex items-center gap-1 text-gray-500 mt-1">
-              <MapPin size={16} />
+              <MapPin size={16} aria-hidden="true" />
               <span>{currentUser.harbor.name}</span>
             </div>
           </div>
-          <Link href="/points" className="flex items-center gap-1 bg-warning-100 text-warning-700 px-3 py-2 rounded-xl">
-            <Award size={18} />
+          <Link
+            href="/points"
+            className="flex items-center gap-1 bg-warning-100 text-warning-700 px-3 py-2 rounded-xl hover:bg-warning-200 transition-colors"
+            aria-label={`내 포인트 ${currentUser.points.toLocaleString()}점`}
+          >
+            <Award size={18} aria-hidden="true" />
             <span className="font-bold">{currentUser.points.toLocaleString()}P</span>
           </Link>
         </div>
       </section>
 
-      {/* 현재 날씨 카드 */}
+      {/* 2. 긴급 알림 배너 (지연/SOS 있을 때) */}
+      {urgentTrips.length > 0 && (
+        <section className="card bg-danger-50 border-2 border-danger-300 animate-slide-up">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-danger-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <AlertTriangle size={24} className="text-danger-600" aria-hidden="true" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-danger-700">
+                {urgentTrips[0].status === 'sos' ? 'SOS 발생!' : '귀항 지연 발생!'}
+              </p>
+              <p className="text-sm text-danger-600">
+                {urgentTrips[0].destination}에서 {urgentTrips[0].status === 'sos' ? '긴급 구조 요청' : '예정 시간 초과'}
+              </p>
+            </div>
+            <Link
+              href={`/trips/${urgentTrips[0].id}`}
+              className="btn-danger py-2 px-4 text-sm"
+            >
+              확인
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* 3. 진행 중인 출항 (있으면) */}
+      {activeTrips.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-lg text-navy-500">진행 중인 출항</h3>
+            <Link href="/trips" className="text-primary-500 text-sm flex items-center">
+              전체 <ChevronRight size={16} aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {activeTrips.slice(0, 2).map((trip) => (
+              <Link
+                key={trip.id}
+                href={`/trips/${trip.id}`}
+                className="card-hover flex items-center gap-4"
+              >
+                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                  <Ship size={24} className="text-primary-600" aria-hidden="true" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-navy-500">{trip.destination}</p>
+                  <p className="text-sm text-gray-500">
+                    {trip.vessel?.name || '선박'} · 체크인 {trip.checkins.length}회
+                  </p>
+                </div>
+                <span className="badge badge-primary">운항 중</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 4. 현재 날씨 카드 */}
       {weather && (
         <section className="card bg-gradient-to-br from-primary-500 to-primary-600 text-white">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg">오늘의 날씨</h3>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+            <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${
               weather.safetyLevel === 'good' ? 'bg-secondary-500' :
               weather.safetyLevel === 'caution' ? 'bg-warning-500' :
               weather.safetyLevel === 'warning' ? 'bg-accent-500' :
               'bg-danger-500'
             }`}>
+              {getSafetyIcon(weather.safetyLevel)}
               {getSafetyLevelText(weather.safetyLevel)}
             </span>
           </div>
@@ -124,81 +223,12 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* 빠른 액션 버튼들 */}
-      <section>
-        <div className="grid grid-cols-2 gap-4">
-          <Link href="/risk-reports/new" className="action-btn">
-            <div className="w-12 h-12 bg-warning-100 rounded-full flex items-center justify-center mb-2">
-              <AlertTriangle size={24} className="text-warning-600" />
-            </div>
-            <span className="font-semibold text-navy-500">위험정보 공유</span>
-            <span className="text-sm text-gray-500">+100P</span>
-          </Link>
-
-          <Link href="/trips/new" className="action-btn">
-            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mb-2">
-              <Ship size={24} className="text-primary-600" />
-            </div>
-            <span className="font-semibold text-navy-500">출항 등록</span>
-            <span className="text-sm text-gray-500">안전 체크인</span>
-          </Link>
-
-          <Link href="/buddy" className="action-btn">
-            <div className="w-12 h-12 bg-secondary-100 rounded-full flex items-center justify-center mb-2">
-              <Users size={24} className="text-secondary-600" />
-            </div>
-            <span className="font-semibold text-navy-500">동료 확인</span>
-            <span className="text-sm text-gray-500">오늘의 매칭</span>
-          </Link>
-
-          <Link href="/sos" className="action-btn border-2 border-danger-200">
-            <div className="w-12 h-12 bg-danger-100 rounded-full flex items-center justify-center mb-2">
-              <Phone size={24} className="text-danger-600" />
-            </div>
-            <span className="font-semibold text-danger-600">긴급 SOS</span>
-            <span className="text-sm text-gray-500">3초 꾹 누르기</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* 진행 중인 출항 */}
-      {activeTrips.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-lg text-navy-500">진행 중인 출항</h3>
-            <Link href="/trips" className="text-primary-500 text-sm flex items-center">
-              전체 <ChevronRight size={16} />
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {activeTrips.slice(0, 2).map((trip) => (
-              <Link
-                key={trip.id}
-                href={`/trips/${trip.id}`}
-                className="card-hover flex items-center gap-4"
-              >
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                  <Ship size={24} className="text-primary-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-navy-500">{trip.destination}</p>
-                  <p className="text-sm text-gray-500">
-                    {trip.vessel?.name || '선박'} · 체크인 {trip.checkins.length}회
-                  </p>
-                </div>
-                <span className="badge badge-primary">운항 중</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 최근 위험 정보 */}
+      {/* 5. 최근 위험 정보 */}
       <section>
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-lg text-navy-500">최근 위험 정보</h3>
           <Link href="/risk-reports" className="text-primary-500 text-sm flex items-center">
-            전체 <ChevronRight size={16} />
+            전체 <ChevronRight size={16} aria-hidden="true" />
           </Link>
         </div>
         <div className="space-y-3">
@@ -215,12 +245,7 @@ export default function HomePage() {
                   report.severity === 'medium' ? 'bg-warning-100' :
                   'bg-gray-100'
                 }`}>
-                  <AlertTriangle size={20} className={
-                    report.severity === 'critical' ? 'text-danger-600' :
-                    report.severity === 'high' ? 'text-accent-600' :
-                    report.severity === 'medium' ? 'text-warning-600' :
-                    'text-gray-600'
-                  } />
+                  {getSeverityIcon(report.severity)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-navy-500 truncate">{report.title}</p>
@@ -237,7 +262,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 안전 팁 */}
+      {/* 6. 빠른 액션 버튼들 */}
+      <section>
+        <div className="grid grid-cols-2 gap-4">
+          <Link href="/risk-reports/new" className="action-btn">
+            <div className="w-12 h-12 bg-warning-100 rounded-full flex items-center justify-center mb-2">
+              <AlertTriangle size={24} className="text-warning-600" aria-hidden="true" />
+            </div>
+            <span className="font-semibold text-navy-500">위험정보 공유</span>
+            <span className="text-sm text-gray-500">+100P</span>
+          </Link>
+
+          <Link href="/trips/new" className="action-btn">
+            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mb-2">
+              <Ship size={24} className="text-primary-600" aria-hidden="true" />
+            </div>
+            <span className="font-semibold text-navy-500">출항 등록</span>
+            <span className="text-sm text-gray-500">안전 체크인</span>
+          </Link>
+
+          <Link href="/buddy" className="action-btn">
+            <div className="w-12 h-12 bg-secondary-100 rounded-full flex items-center justify-center mb-2">
+              <Users size={24} className="text-secondary-600" aria-hidden="true" />
+            </div>
+            <span className="font-semibold text-navy-500">동료 확인</span>
+            <span className="text-sm text-gray-500">오늘의 매칭</span>
+          </Link>
+
+          <Link href="/sos" className="action-btn border-2 border-danger-200">
+            <div className="w-12 h-12 bg-danger-100 rounded-full flex items-center justify-center mb-2">
+              <Phone size={24} className="text-danger-600" aria-hidden="true" />
+            </div>
+            <span className="font-semibold text-danger-600">긴급 SOS</span>
+            <span className="text-sm text-gray-500">3초 꾹 누르기</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* 7. 안전 팁 */}
       <section className="card bg-secondary-50 border border-secondary-200">
         <h3 className="font-bold text-secondary-700 mb-2">💡 오늘의 안전 수칙</h3>
         <p className="text-secondary-600">
