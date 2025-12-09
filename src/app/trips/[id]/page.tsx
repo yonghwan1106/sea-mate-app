@@ -33,11 +33,14 @@ export default function TripDetailPage() {
     );
   }
 
-  const statusConfig = {
+  const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
     scheduled: { label: '예정', color: 'bg-gray-100 text-gray-700', bgColor: 'bg-gray-50' },
+    preparing: { label: '준비 중', color: 'bg-gray-100 text-gray-700', bgColor: 'bg-gray-50' },
     sailing: { label: '운항 중', color: 'bg-primary-100 text-primary-700', bgColor: 'bg-primary-50' },
+    returning: { label: '귀항 중', color: 'bg-secondary-100 text-secondary-700', bgColor: 'bg-secondary-50' },
     completed: { label: '완료', color: 'bg-secondary-100 text-secondary-700', bgColor: 'bg-secondary-50' },
     cancelled: { label: '취소', color: 'bg-gray-100 text-gray-500', bgColor: 'bg-gray-50' },
+    sos: { label: 'SOS', color: 'bg-danger-100 text-danger-700', bgColor: 'bg-danger-50' },
     overdue: { label: '지연', color: 'bg-danger-100 text-danger-700', bgColor: 'bg-danger-50' },
   };
 
