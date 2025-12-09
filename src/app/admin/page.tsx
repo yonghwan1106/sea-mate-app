@@ -332,7 +332,7 @@ export default function AdminDashboardPage() {
                         <div>
                           <p className="font-medium text-navy-500">{user.name}</p>
                           <p className="text-sm text-gray-500">
-                            {user.harbor.name} · {user.vessel.name}
+                            {user.harbor.name}{user.vessel ? ` · ${user.vessel.name}` : ''}
                           </p>
                         </div>
                       </div>
