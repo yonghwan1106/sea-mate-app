@@ -759,3 +759,74 @@ export function getTripStatusColor(status: string): string {
     default: return 'bg-gray-500';
   }
 }
+
+// ============================================================================
+// 접근성 향상 유틸리티 함수
+// ============================================================================
+
+// 위험 심각도에 따른 한글 텍스트
+export function getSeverityText(severity: string): string {
+  switch (severity) {
+    case 'low': return '낮음';
+    case 'medium': return '보통';
+    case 'high': return '높음';
+    case 'critical': return '위험';
+    default: return '알 수 없음';
+  }
+}
+
+// 위험 유형에 따른 한글 텍스트
+export function getRiskTypeText(type: string): string {
+  switch (type) {
+    case 'wave': return '높은 파도';
+    case 'wind': return '강풍';
+    case 'obstacle': return '장애물';
+    case 'weather': return '악천후';
+    case 'equipment': return '장비 고장';
+    default: return '기타 위험';
+  }
+}
+
+// 안전 등급에 따른 이모지
+export function getSafetyLevelEmoji(level: string): string {
+  switch (level) {
+    case 'safe': return '🟢';
+    case 'caution': return '🟡';
+    case 'warning': return '🟠';
+    case 'danger': return '🔴';
+    default: return '⚪';
+  }
+}
+
+// 날짜 포맷팅 (접근성 고려 - 상대시간 + 절대시간)
+export function formatDateAccessible(dateString: string): { relative: string; absolute: string } {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  let relative: string;
+  if (diffMinutes < 1) {
+    relative = '방금 전';
+  } else if (diffMinutes < 60) {
+    relative = `${diffMinutes}분 전`;
+  } else if (diffHours < 24) {
+    relative = `${diffHours}시간 전`;
+  } else if (diffDays < 7) {
+    relative = `${diffDays}일 전`;
+  } else {
+    relative = date.toLocaleDateString('ko-KR');
+  }
+
+  const absolute = date.toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  return { relative, absolute };
+}
