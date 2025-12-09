@@ -3,340 +3,350 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  statistics, users, harbors, getActiveTrips,
-  riskReports, getTripStatusText, getTripStatusColor,
-  getRiskTypeIcon, getSeverityColor
-} from '@/data/mockDatabase';
-import {
-  Users, Ship, AlertTriangle, CheckCircle, TrendingDown,
-  Clock, MapPin, Activity, Bell, BarChart3, Home
+  ArrowLeft,
+  Users,
+  Ship,
+  AlertTriangle,
+  Phone,
+  TrendingUp,
+  MapPin,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  BarChart3,
+  Activity
 } from 'lucide-react';
+import { useAppStore } from '@/store/appStore';
+import { mockUsers } from '@/data/mockUsers';
+import { mockHarbors } from '@/data/mockHarbors';
+import { formatRelativeTime } from '@/lib/utils';
 
-export default function AdminPage() {
-  const [selectedHarbor, setSelectedHarbor] = useState('all');
+export default function AdminDashboardPage() {
+  const { trips, riskReports } = useAppStore();
+  const [activeTab, setActiveTab] = useState<'overview' | 'monitoring' | 'users'>('overview');
 
-  const activeTrips = getActiveTrips();
-  const activeRisks = riskReports.filter(r => r.isActive);
+  // 통계 계산
+  const totalUsers = mockUsers.filter((u) => u.role === 'fisher').length;
+  const activeTrips = trips.filter((t) => t.status === 'sailing');
+  const overdueTrips = trips.filter((t) => t.status === 'overdue');
+  const recentRisks = riskReports.slice(0, 5);
+  const criticalRisks = riskReports.filter((r) => r.severity === 'critical' || r.severity === 'high');
 
-  const filteredTrips = selectedHarbor === 'all'
-    ? activeTrips
-    : activeTrips.filter(t => {
-        const user = users.find(u => u.id === t.userId);
-        return user?.harborId === selectedHarbor;
-      });
+  // 항구별 통계
+  const harborStats = mockHarbors.slice(0, 5).map((harbor) => {
+    const harborUsers = mockUsers.filter((u) => u.harbor.id === harbor.id);
+    const harborTrips = trips.filter((t) => {
+      const user = mockUsers.find((u) => u.id === t.userId);
+      return user?.harbor.id === harbor.id && t.status === 'sailing';
+    });
+    return {
+      ...harbor,
+      userCount: harborUsers.length,
+      activeTrips: harborTrips.length,
+    };
+  });
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      {/* 헤더 */}
-      <header className="bg-[#1a365d] sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">
-              <span className="text-cyan-400">바다동료</span> 관제센터
-            </h1>
-            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
-              실시간
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-white">
-              <Home size={20} />
-              앱으로
+    <div className="min-h-screen bg-gray-100">
+      {/* 관리자 헤더 */}
+      <div className="bg-navy-500 text-white px-4 py-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/" className="touch-target">
+              <ArrowLeft size={24} />
             </Link>
-            <button className="relative p-2 rounded-full hover:bg-white/10">
-              <Bell size={24} />
-              <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center">
-                3
-              </span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* 통계 카드 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-          <div className="glass-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center">
-                <Users size={24} className="text-cyan-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{statistics.totalUsers.toLocaleString()}</p>
-                <p className="text-sm text-gray-400">총 가입자</p>
-              </div>
+            <div>
+              <h1 className="text-xl font-bold">관리자 대시보드</h1>
+              <p className="text-sm opacity-80">바다동료 모니터링 시스템</p>
             </div>
           </div>
 
-          <div className="glass-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                <Ship size={24} className="text-green-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{activeTrips.length}</p>
-                <p className="text-sm text-gray-400">현재 출항</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                <AlertTriangle size={24} className="text-orange-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{activeRisks.length}</p>
-                <p className="text-sm text-gray-400">활성 위험정보</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                <CheckCircle size={24} className="text-purple-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{statistics.sosResolved}</p>
-                <p className="text-sm text-gray-400">SOS 해결</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                <Clock size={24} className="text-blue-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{statistics.averageResponseTime}분</p>
-                <p className="text-sm text-gray-400">평균 대응시간</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
-                <TrendingDown size={24} className="text-red-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">-{statistics.accidentReduction}%</p>
-                <p className="text-sm text-gray-400">사고 감소율</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 실시간 출항 현황 */}
-          <div className="lg:col-span-2 glass-card p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <Ship size={20} className="text-cyan-400" />
-                실시간 출항 현황
-              </h2>
-              <select
-                value={selectedHarbor}
-                onChange={(e) => setSelectedHarbor(e.target.value)}
-                className="bg-white/10 rounded-lg px-3 py-2 text-sm"
+          {/* 탭 */}
+          <div className="flex gap-2">
+            {[
+              { value: 'overview', label: '개요' },
+              { value: 'monitoring', label: '실시간 모니터링' },
+              { value: 'users', label: '사용자 관리' },
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value as any)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === tab.value
+                    ? 'bg-white text-navy-500'
+                    : 'bg-white/10 hover:bg-white/20'
+                }`}
               >
-                <option value="all">전체 어항</option>
-                {harbors.map((harbor) => (
-                  <option key={harbor.id} value={harbor.id}>{harbor.name}</option>
-                ))}
-              </select>
-            </div>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-            {/* 지도 대체 (실제로는 Mapbox/Google Maps 사용) */}
-            <div className="bg-gray-800 rounded-xl h-64 mb-4 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-cyan-900/50">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Activity size={48} className="text-cyan-400 mx-auto mb-2 animate-pulse" />
-                    <p className="text-gray-400">실시간 위치 모니터링</p>
-                    <p className="text-sm text-gray-500">{filteredTrips.length}척 출항 중</p>
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        {/* 개요 탭 */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* 핵심 지표 카드 */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="card">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                    <Users size={20} className="text-primary-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">등록 어민</p>
+                    <p className="text-2xl font-bold text-navy-500">{totalUsers}</p>
                   </div>
                 </div>
+              </div>
 
-                {/* 가상의 마커들 */}
-                {filteredTrips.map((trip, index) => (
-                  <div
-                    key={trip.id}
-                    className="absolute w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"
-                    style={{
-                      left: `${20 + (index * 15) % 60}%`,
-                      top: `${30 + (index * 20) % 40}%`,
-                    }}
-                    title={trip.userName}
-                  />
-                ))}
+              <div className="card">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-secondary-100 rounded-full flex items-center justify-center">
+                    <Ship size={20} className="text-secondary-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">운항 중</p>
+                    <p className="text-2xl font-bold text-secondary-600">{activeTrips.length}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-danger-100 rounded-full flex items-center justify-center">
+                    <AlertCircle size={20} className="text-danger-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">귀항 지연</p>
+                    <p className="text-2xl font-bold text-danger-600">{overdueTrips.length}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-warning-100 rounded-full flex items-center justify-center">
+                    <AlertTriangle size={20} className="text-warning-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">위험 경고</p>
+                    <p className="text-2xl font-bold text-warning-600">{criticalRisks.length}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* 출항 목록 */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-gray-400 border-b border-white/10">
-                    <th className="text-left py-2 px-2">어민</th>
-                    <th className="text-left py-2 px-2">선박</th>
-                    <th className="text-left py-2 px-2">목적지</th>
-                    <th className="text-left py-2 px-2">상태</th>
-                    <th className="text-left py-2 px-2">체크인</th>
-                    <th className="text-left py-2 px-2">예상 귀항</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTrips.map((trip) => (
-                    <tr key={trip.id} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="py-3 px-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold">
-                            {trip.userName.charAt(0)}
+            {/* 지연 경고 */}
+            {overdueTrips.length > 0 && (
+              <div className="card border-2 border-danger-300 bg-danger-50">
+                <h3 className="font-semibold text-danger-700 mb-4 flex items-center gap-2">
+                  <AlertCircle size={20} />
+                  귀항 지연 경고 ({overdueTrips.length}건)
+                </h3>
+                <div className="space-y-3">
+                  {overdueTrips.map((trip) => {
+                    const user = mockUsers.find((u) => u.id === trip.userId);
+                    return (
+                      <div key={trip.id} className="flex items-center justify-between bg-white p-3 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-danger-100 rounded-full flex items-center justify-center">
+                            <Ship size={18} className="text-danger-600" />
                           </div>
-                          <span>{trip.userName}</span>
+                          <div>
+                            <p className="font-medium text-navy-500">{user?.name}</p>
+                            <p className="text-sm text-gray-500">
+                              {trip.destination} · {trip.vessel.name}
+                            </p>
+                          </div>
                         </div>
-                      </td>
-                      <td className="py-3 px-2 text-gray-400">{trip.vesselName}</td>
-                      <td className="py-3 px-2 text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <MapPin size={14} />
-                          {trip.destination.name}
+                        <div className="flex gap-2">
+                          <button className="btn-danger px-3 py-1 text-sm flex items-center gap-1">
+                            <Phone size={14} />
+                            연락
+                          </button>
                         </div>
-                      </td>
-                      <td className="py-3 px-2">
-                        <span className={`px-2 py-1 rounded-full text-xs text-white ${getTripStatusColor(trip.status)}`}>
-                          {getTripStatusText(trip.status)}
-                        </span>
-                      </td>
-                      <td className="py-3 px-2">
-                        <span className="text-green-400">{trip.checkins.length}회</span>
-                      </td>
-                      <td className="py-3 px-2 text-gray-400">
-                        {new Date(trip.expectedReturn).toLocaleTimeString('ko-KR', {
-                          hour: '2-digit', minute: '2-digit'
-                        })}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-          {/* 사이드바 */}
-          <div className="space-y-4">
-            {/* 활성 위험정보 */}
-            <div className="glass-card p-4">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <AlertTriangle size={20} className="text-orange-400" />
-                활성 위험정보
+            {/* 항구별 현황 */}
+            <div className="card">
+              <h3 className="font-semibold text-navy-500 mb-4 flex items-center gap-2">
+                <MapPin size={20} className="text-primary-500" />
+                항구별 현황
               </h3>
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {activeRisks.slice(0, 5).map((risk) => (
-                  <div key={risk.id} className="p-3 bg-white/5 rounded-xl">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">{getRiskTypeIcon(risk.type)}</span>
-                      <span className="font-medium">{risk.userName}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs text-white ${getSeverityColor(risk.severity)}`}>
-                        {risk.severity}
-                      </span>
+              <div className="space-y-3">
+                {harborStats.map((harbor) => (
+                  <div key={harbor.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-navy-500">{harbor.name}</p>
+                      <p className="text-sm text-gray-500">{harbor.region}</p>
                     </div>
-                    <p className="text-sm text-gray-400 truncate">{risk.content}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {risk.location.name}
-                    </p>
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="text-center">
+                        <p className="font-bold text-primary-600">{harbor.userCount}</p>
+                        <p className="text-gray-400">등록</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="font-bold text-secondary-600">{harbor.activeTrips}</p>
+                        <p className="text-gray-400">운항중</p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* 어항별 현황 */}
-            <div className="glass-card p-4">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <BarChart3 size={20} className="text-purple-400" />
-                어항별 현황
+            {/* 최근 위험 정보 */}
+            <div className="card">
+              <h3 className="font-semibold text-navy-500 mb-4 flex items-center gap-2">
+                <AlertTriangle size={20} className="text-warning-500" />
+                최근 위험 정보
               </h3>
               <div className="space-y-3">
-                {harbors.slice(0, 5).map((harbor) => {
-                  const harborTrips = activeTrips.filter(t => {
-                    const user = users.find(u => u.id === t.userId);
-                    return user?.harborId === harbor.id;
-                  });
-                  const percentage = (harborTrips.length / harbor.memberCount) * 100;
+                {recentRisks.map((risk) => (
+                  <div key={risk.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className={`w-3 h-3 rounded-full ${
+                      risk.severity === 'critical' ? 'bg-danger-500' :
+                      risk.severity === 'high' ? 'bg-accent-500' :
+                      risk.severity === 'medium' ? 'bg-warning-500' :
+                      'bg-gray-400'
+                    }`} />
+                    <div className="flex-1">
+                      <p className="font-medium text-navy-500">{risk.title}</p>
+                      <p className="text-sm text-gray-500">
+                        {risk.location.name} · {formatRelativeTime(risk.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
-                  return (
-                    <div key={harbor.id}>
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <span>{harbor.name}</span>
-                        <span className="text-gray-400">
-                          {harborTrips.length}/{harbor.memberCount}
-                        </span>
+        {/* 실시간 모니터링 탭 */}
+        {activeTab === 'monitoring' && (
+          <div className="space-y-6">
+            <div className="card">
+              <h3 className="font-semibold text-navy-500 mb-4 flex items-center gap-2">
+                <Activity size={20} className="text-secondary-500" />
+                실시간 운항 현황
+              </h3>
+              {activeTrips.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  현재 운항 중인 선박이 없습니다
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {activeTrips.map((trip) => {
+                    const user = mockUsers.find((u) => u.id === trip.userId);
+                    const lastCheckin = trip.checkins[trip.checkins.length - 1];
+                    return (
+                      <div key={trip.id} className="p-4 border border-gray-200 rounded-xl">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                              <Ship size={24} className="text-primary-600" />
+                            </div>
+                            <div>
+                              <p className="font-bold text-navy-500">{user?.name}</p>
+                              <p className="text-sm text-gray-500">{trip.vessel.name}</p>
+                            </div>
+                          </div>
+                          <span className="badge badge-primary">운항 중</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-500">목적지</p>
+                            <p className="font-medium">{trip.destination}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">체크인</p>
+                            <p className="font-medium">{trip.checkins.length}회</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">마지막 체크인</p>
+                            <p className="font-medium">
+                              {lastCheckin
+                                ? formatRelativeTime(lastCheckin.time)
+                                : '-'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500">예상 귀항</p>
+                            <p className="font-medium">
+                              {new Date(trip.expectedReturn).toLocaleTimeString('ko-KR', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
-                          style={{ width: `${percentage}%` }}
-                        />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 지도 플레이스홀더 */}
+            <div className="card">
+              <h3 className="font-semibold text-navy-500 mb-4 flex items-center gap-2">
+                <MapPin size={20} className="text-primary-500" />
+                위치 현황 (지도)
+              </h3>
+              <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center">
+                <div className="text-center text-gray-400">
+                  <MapPin size={48} className="mx-auto mb-2" />
+                  <p>지도 뷰 (데모에서는 표시되지 않음)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 사용자 관리 탭 */}
+        {activeTab === 'users' && (
+          <div className="space-y-4">
+            <div className="card">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-navy-500">등록 어민 목록</h3>
+                <span className="badge badge-primary">{totalUsers}명</span>
+              </div>
+              <div className="space-y-3">
+                {mockUsers
+                  .filter((u) => u.role === 'fisher')
+                  .map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                          <Users size={18} className="text-primary-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-navy-500">{user.name}</p>
+                          <p className="text-sm text-gray-500">
+                            {user.harbor.name} · {user.vessel.name}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-warning-600">{user.points}P</p>
+                        <p className="text-xs text-gray-400">{user.age}세</p>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 최근 SOS 알림 */}
-            <div className="glass-card p-4">
-              <h3 className="font-bold mb-4 flex items-center gap-2 text-red-400">
-                <Bell size={20} />
-                최근 SOS 알림
-              </h3>
-              <div className="space-y-3">
-                <div className="p-3 bg-green-500/10 rounded-xl border border-green-500/30">
-                  <div className="flex items-center gap-2 mb-1">
-                    <CheckCircle size={16} className="text-green-400" />
-                    <span className="font-medium">정부산</span>
-                    <span className="text-xs text-green-400">해결됨</span>
-                  </div>
-                  <p className="text-xs text-gray-400">12월 7일 14:23 발생</p>
-                  <p className="text-xs text-gray-500">동료 김순득 님이 구조 지원</p>
-                </div>
-                <p className="text-center text-gray-500 text-sm">
-                  현재 활성 SOS 없음
-                </p>
+                  ))}
               </div>
             </div>
           </div>
-        </div>
-
-        {/* 푸터 통계 */}
-        <div className="mt-6 glass-card p-4">
-          <h3 className="font-bold mb-4 flex items-center gap-2">
-            <Activity size={20} className="text-cyan-400" />
-            월간 성과
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div>
-              <p className="text-3xl font-bold text-green-400">98.7%</p>
-              <p className="text-sm text-gray-400">무사고율</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-cyan-400">1,234</p>
-              <p className="text-sm text-gray-400">위험정보 공유</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-purple-400">156</p>
-              <p className="text-sm text-gray-400">동료 매칭</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-yellow-400">2.3억</p>
-              <p className="text-sm text-gray-400">예상 절감액</p>
-            </div>
-          </div>
-        </div>
-      </main>
+        )}
+      </div>
     </div>
   );
 }

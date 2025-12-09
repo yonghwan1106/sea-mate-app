@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 바다동료 (Sea-Mate)
 
-## Getting Started
+> 어민 상호 안전망 커뮤니티 플랫폼
 
-First, run the development server:
+## 프로젝트 개요
+
+전국 8만 어민들이 실시간으로 위험 정보를 공유하고, AI가 개인 맞춤형 안전 알림을 제공하며, 동료 어민끼리 서로를 지켜주는 '상호 안전망' 커뮤니티 플랫폼입니다.
+
+### 핵심 가치
+> "정부는 플랫폼을, 어민은 콘텐츠를" - 어민 주도형 안전 혁신
+
+## 주요 기능
+
+### 1. 커뮤니티 위험정보 공유
+- 카카오톡 스타일 간편 UI
+- 음성 입력 지원
+- 위치 기반 자동 그룹화
+- 다국어 지원 (한/영/베트남어)
+
+### 2. AI 개인 맞춤 안전 비서
+- 개별 어민 조업패턴 학습
+- 맞춤 안전 체크리스트
+- 이상패턴 감지
+
+### 3. 동료 안전망 (Buddy System)
+- 출항 시 자동 동료 매칭
+- 주기적 체크인 (2시간마다)
+- 무응답 시 에스컬레이션
+- SOS 원터치 긴급 구조 요청
+
+### 4. 안전 포인트 보상
+- 정보 공유/구조 참여 시 포인트 적립
+- 안전장비/보험료 할인 혜택
+
+## 기술 스택
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Icons**: Lucide React
+
+## 설치 및 실행
 
 ```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 프로덕션 빌드
+npm run build
+
+# 프로덕션 서버 실행
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 프로젝트 구조
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── layout.tsx          # 루트 레이아웃
+│   ├── page.tsx            # 홈 페이지
+│   ├── login/              # 로그인
+│   ├── risk-reports/       # 위험정보
+│   ├── trips/              # 출항 관리
+│   ├── buddy/              # 동료 안전망
+│   ├── sos/                # SOS 긴급호출
+│   ├── points/             # 안전 포인트
+│   ├── profile/            # 내 정보
+│   └── admin/              # 관리자
+├── components/             # 컴포넌트
+├── data/                   # 목업 데이터
+├── store/                  # Zustand 스토어
+├── types/                  # TypeScript 타입
+└── lib/                    # 유틸리티
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 데모 계정
 
-## Learn More
+| 역할 | 이름 | 설명 |
+|-----|-----|------|
+| 어민 | 김순득 | 68세 베테랑 어민 |
+| 어민 | 박민수 | 42세 귀어 5년차 |
+| 외국인 선원 | 응웬 반 | 29세 베트남 선원 |
+| 가족 | 김영희 | 어민 배우자 |
+| 관리자 | 관리자 | 시스템 관리자 |
 
-To learn more about Next.js, take a look at the following resources:
+## 라이선스
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+이 프로젝트는 2025년 한국어촌어항공단 안전혁신 공모전 출품작입니다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**바다동료** - 모든 어민이 안전하게 바다에 나가고, 무사히 돌아오는 세상을 만듭니다.
