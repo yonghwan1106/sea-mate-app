@@ -40,9 +40,12 @@ export default function RiskReportDetailPage() {
     low: 'bg-gray-100 text-gray-700 border-gray-200',
   };
 
-  const typeIcons = {
+  const typeIcons: Record<string, string> = {
     weather: '🌧️',
     sea_condition: '🌊',
+    wave: '🌊',
+    wind: '💨',
+    rock: '🪨',
     equipment: '🔧',
     obstacle: '⚠️',
     other: '📌',
