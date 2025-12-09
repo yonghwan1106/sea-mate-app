@@ -94,7 +94,7 @@ export default function HomePage() {
     <div className="min-h-screen">
       <Header />
 
-      <main className="max-w-lg mx-auto px-4 py-4 space-y-4">
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
         {/* 오늘의 안전등급 - 색상 + 아이콘 + 텍스트 병행 */}
         <section
           className={`safety-card p-6 border-2 ${safetyStyle.border}`}
@@ -167,11 +167,11 @@ export default function HomePage() {
         )}
 
         {/* 빠른 메뉴 - SOS 강조 */}
-        <section className="grid grid-cols-2 gap-3" role="group" aria-label="빠른 메뉴">
+        <section className="grid grid-cols-2 gap-4" role="group" aria-label="빠른 메뉴">
           {/* 위험공유 버튼 */}
           <button
             onClick={() => setIsVoiceActive(!isVoiceActive)}
-            className={`btn-large flex flex-col items-center justify-center gap-2 ${
+            className={`btn-large flex flex-col items-center justify-center gap-2 h-28 ${
               isVoiceActive
                 ? 'bg-orange-500 voice-indicator'
                 : 'bg-gradient-to-br from-orange-500 to-orange-600'
@@ -183,22 +183,23 @@ export default function HomePage() {
             <span className="text-xs opacity-80">음성 입력</span>
           </button>
 
-          {/* SOS 버튼 - 대폭 강조 */}
+          {/* SOS 버튼 - 빨간색 강조 */}
           <Link
             href="/sos"
-            className="btn-large bg-gradient-to-br from-red-600 to-red-700 flex flex-col items-center justify-center gap-2 ring-2 ring-red-400 ring-offset-2 ring-offset-[#1a365d] animate-pulse hover:animate-none relative overflow-hidden"
+            className="btn-large h-28 flex flex-col items-center justify-center gap-2 relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' }}
             aria-label="긴급 SOS 신고"
           >
-            <div className="absolute inset-0 bg-red-500/20" />
-            <Phone size={28} className="relative z-10" aria-hidden="true" />
-            <span className="text-xl font-black relative z-10">SOS</span>
-            <span className="text-xs opacity-90 relative z-10">긴급신고</span>
+            <div className="absolute inset-0 border-4 border-red-400 rounded-2xl animate-pulse" />
+            <Phone size={32} className="relative z-10 text-white" aria-hidden="true" />
+            <span className="text-2xl font-black relative z-10 text-white">SOS</span>
+            <span className="text-xs relative z-10 text-red-100">긴급신고</span>
           </Link>
 
           {/* 출항등록 버튼 */}
           <Link
             href="/trip"
-            className="btn-large bg-gradient-to-br from-cyan-500 to-cyan-600 flex flex-col items-center justify-center gap-2"
+            className="btn-large h-28 bg-gradient-to-br from-cyan-500 to-cyan-600 flex flex-col items-center justify-center gap-2"
             aria-label="출항 등록하기"
           >
             <Ship size={32} aria-hidden="true" />
@@ -209,7 +210,7 @@ export default function HomePage() {
           {/* 동료현황 버튼 */}
           <Link
             href="/buddy"
-            className="btn-large bg-gradient-to-br from-purple-500 to-purple-600 flex flex-col items-center justify-center gap-2"
+            className="btn-large h-28 bg-gradient-to-br from-purple-500 to-purple-600 flex flex-col items-center justify-center gap-2"
             aria-label="동료 현황 보기"
           >
             <Users size={32} aria-hidden="true" />
@@ -249,8 +250,8 @@ export default function HomePage() {
         )}
 
         {/* 우리 어항 소식 - 섹션 제목 강화 */}
-        <section className="glass-card p-4" role="region" aria-label="우리 어항 위험정보 소식">
-          <div className="flex items-center justify-between mb-4">
+        <section className="glass-card p-5" role="region" aria-label="우리 어항 위험정보 소식">
+          <div className="flex items-center justify-between mb-5">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <AlertTriangle size={20} className="text-orange-400" aria-hidden="true" />
               우리 어항 소식
@@ -263,14 +264,14 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {recentRisks.map((risk) => {
               const severityText = getSeverityText(risk.severity);
               return (
-                <article key={risk.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                <article key={risk.id} className="flex items-start gap-3 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
                   <span className="text-2xl" aria-hidden="true">{getRiskTypeIcon(risk.type)}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span className="font-medium">{risk.userName}</span>
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(risk.severity)}`}
@@ -283,8 +284,8 @@ export default function HomePage() {
                         {severityText}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-300">{risk.content}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-sm text-gray-300 leading-relaxed">{risk.content}</p>
+                    <p className="text-xs text-gray-500 mt-2">
                       {formatDistanceToNow(new Date(risk.createdAt), { addSuffix: true, locale: ko })}
                       {' · '}
                       좋아요 {risk.likes}
@@ -297,8 +298,8 @@ export default function HomePage() {
         </section>
 
         {/* 현재 출항 중인 동료들 - UI 개선 */}
-        <section className="glass-card p-4" role="region" aria-label="출항 중인 동료 현황">
-          <div className="flex items-center justify-between mb-4">
+        <section className="glass-card p-5" role="region" aria-label="출항 중인 동료 현황">
+          <div className="flex items-center justify-between mb-5">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <Ship size={20} className="text-cyan-400" aria-hidden="true" />
               출항 중인 동료
@@ -312,7 +313,7 @@ export default function HomePage() {
           </div>
 
           {/* 요약 카드 형태로 변경 */}
-          <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="grid grid-cols-2 gap-3">
             {activeTrips.slice(0, 4).map((trip) => {
               const statusConfig = {
                 fishing: { text: '조업중', color: 'text-green-400', bg: 'bg-green-500/20', icon: '🎣' },
@@ -324,14 +325,14 @@ export default function HomePage() {
               return (
                 <div
                   key={trip.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-3 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
                     {trip.userName.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{trip.userName}</p>
-                    <p className={`text-xs flex items-center gap-1 ${status.color}`}>
+                    <p className={`text-xs flex items-center gap-1 mt-1 ${status.color}`}>
                       <span aria-hidden="true">{status.icon}</span>
                       {status.text}
                     </p>
@@ -342,15 +343,15 @@ export default function HomePage() {
           </div>
 
           {activeTrips.length > 4 && (
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-gray-500 text-center mt-3">
               +{activeTrips.length - 4}명이 더 출항 중입니다
             </p>
           )}
         </section>
 
         {/* 포인트 현황 - 섹션 제목 강화 */}
-        <section className="glass-card p-4" role="region" aria-label="내 안전 포인트 현황">
-          <div className="flex items-center justify-between mb-3">
+        <section className="glass-card p-5" role="region" aria-label="내 안전 포인트 현황">
+          <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <TrendingUp size={20} className="text-yellow-400" aria-hidden="true" />
               내 안전 포인트
@@ -387,7 +388,7 @@ export default function HomePage() {
 
         {/* AI 안전 비서 메시지 - 강조 */}
         <section
-          className="glass-card p-4 border-2 border-cyan-500/50 bg-gradient-to-r from-cyan-500/10 to-blue-500/10"
+          className="glass-card p-5 border-2 border-cyan-500/50 bg-gradient-to-r from-cyan-500/10 to-blue-500/10"
           role="complementary"
           aria-label="AI 안전 비서 안내"
         >
