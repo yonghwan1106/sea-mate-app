@@ -19,11 +19,14 @@ export default function TripsPage() {
     return true;
   });
 
-  const statusConfig = {
+  const statusConfig: Record<TripStatus, { label: string; color: string; icon: typeof Ship }> = {
     scheduled: { label: '예정', color: 'bg-gray-100 text-gray-700', icon: Calendar },
+    preparing: { label: '준비 중', color: 'bg-warning-100 text-warning-700', icon: Clock },
     sailing: { label: '운항 중', color: 'bg-primary-100 text-primary-700', icon: Ship },
+    returning: { label: '귀항 중', color: 'bg-secondary-100 text-secondary-700', icon: Ship },
     completed: { label: '완료', color: 'bg-secondary-100 text-secondary-700', icon: CheckCircle2 },
     cancelled: { label: '취소', color: 'bg-gray-100 text-gray-500', icon: AlertCircle },
+    sos: { label: 'SOS', color: 'bg-danger-100 text-danger-700', icon: AlertCircle },
     overdue: { label: '지연', color: 'bg-danger-100 text-danger-700', icon: AlertCircle },
   };
 

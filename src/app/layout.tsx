@@ -1,13 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Noto_Sans_KR } from 'next/font/google';
 import './globals.css';
 import ClientLayout from '@/components/layout/ClientLayout';
-
-const notoSansKR = Noto_Sans_KR({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-noto-sans-kr',
-});
 
 export const metadata: Metadata = {
   title: '바다동료 - 어민 안전 커뮤니티',
@@ -30,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" className={notoSansKR.variable}>
+    <html lang="ko">
       <body className="font-sans antialiased">
         <ClientLayout>{children}</ClientLayout>
       </body>

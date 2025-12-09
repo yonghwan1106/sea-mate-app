@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -18,13 +19,26 @@ import { useAuthStore } from '@/store/authStore';
 import { useAppStore } from '@/store/appStore';
 import { getWeatherByHarbor } from '@/data/mockWeather';
 import { formatRelativeTime, getSafetyLevelText } from '@/lib/utils';
+import { mockUsers } from '@/data/mockUsers';
 
 export default function HomePage() {
-  const { user } = useAuthStore();
+  const { user, login } = useAuthStore();
   const { riskReports, trips } = useAppStore();
+  const [isReady, setIsReady] = useState(false);
+
+  // 초기화 및 자동 로그인
+  useEffect(() => {
+    if (!user) {
+      login('user-001');
+    }
+    setIsReady(true);
+  }, [user, login]);
+
+  // 현재 사용자 또는 기본 사용자
+  const currentUser = user || mockUsers[0];
 
   // 현재 사용자 항구의 날씨
-  const weather = user ? getWeatherByHarbor(user.harbor.id) : null;
+  const weather = currentUser ? getWeatherByHarbor(currentUser.harbor.id) : null;
 
   // 최근 위험정보 (상위 3개)
   const recentRisks = riskReports.slice(0, 3);
@@ -32,7 +46,7 @@ export default function HomePage() {
   // 진행 중인 출항
   const activeTrips = trips.filter((t) => t.status === 'sailing');
 
-  if (!user) {
+  if (!isReady) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
@@ -50,16 +64,16 @@ export default function HomePage() {
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold text-navy-500">
-              안녕하세요, {user.name}님
+              안녕하세요, {currentUser.name}님
             </h2>
             <div className="flex items-center gap-1 text-gray-500 mt-1">
               <MapPin size={16} />
-              <span>{user.harbor.name}</span>
+              <span>{currentUser.harbor.name}</span>
             </div>
           </div>
           <Link href="/points" className="flex items-center gap-1 bg-warning-100 text-warning-700 px-3 py-2 rounded-xl">
             <Award size={18} />
-            <span className="font-bold">{user.points.toLocaleString()}P</span>
+            <span className="font-bold">{currentUser.points.toLocaleString()}P</span>
           </Link>
         </div>
       </section>

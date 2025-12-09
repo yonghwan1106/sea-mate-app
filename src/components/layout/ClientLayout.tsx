@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import Header from './Header';
@@ -13,23 +13,22 @@ interface ClientLayoutProps {
 export default function ClientLayout({ children }: ClientLayoutProps) {
   const pathname = usePathname();
   const { isLoggedIn, login } = useAuthStore();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Hydration 완료 체크
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // 데모 계정 자동 로그인 (김순득)
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (isHydrated && !isLoggedIn) {
       login('user-001'); // 김순득 어민 계정으로 자동 로그인
     }
-  }, [isLoggedIn, login]);
+  }, [isHydrated, isLoggedIn, login]);
 
   // 관리자 페이지 체크
   const isAdminPage = pathname.startsWith('/admin');
-
-  // SOS 페이지는 전체 화면
-  const isSOSPage = pathname === '/sos';
-
-  if (isSOSPage) {
-    return <>{children}</>;
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Phone, X, MapPin, Users, AlertTriangle, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Phone, X, MapPin, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useAppStore } from '@/store/appStore';
 
@@ -105,28 +105,26 @@ export default function SOSPage() {
   // SOS 발동 화면
   if (sosTriggered && sosActive) {
     return (
-      <div className="min-h-screen bg-danger-500 flex flex-col">
-        {/* SOS 발동 중 화면 */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 text-white">
+      <div className="px-4 py-6">
+        <div className="bg-danger-500 rounded-2xl p-6 text-white min-h-[70vh] flex flex-col items-center justify-center">
           {countdown > 0 ? (
             <>
               {/* 카운트다운 */}
-              <div className="relative mb-8">
-                <div className="w-40 h-40 rounded-full border-8 border-white/30 flex items-center justify-center animate-pulse">
-                  <span className="text-8xl font-bold">{countdown}</span>
+              <div className="relative mb-6">
+                <div className="w-32 h-32 rounded-full border-4 border-white/30 flex items-center justify-center animate-pulse">
+                  <span className="text-6xl font-bold">{countdown}</span>
                 </div>
-                <div className="absolute inset-0 w-40 h-40 rounded-full border-8 border-white animate-pulse-ring" />
               </div>
 
-              <h1 className="text-3xl font-bold mb-4">SOS 발신 중...</h1>
-              <p className="text-xl opacity-90 text-center mb-8">
+              <h1 className="text-2xl font-bold mb-3">SOS 발신 중...</h1>
+              <p className="text-lg opacity-90 text-center mb-6">
                 {countdown}초 후 긴급 구조 요청이 전송됩니다
               </p>
 
               {/* 취소 버튼 */}
               <button
                 onClick={cancelSOS}
-                className="w-full max-w-xs bg-white text-danger-500 font-bold py-4 px-8 rounded-2xl text-xl flex items-center justify-center gap-2"
+                className="w-full bg-white text-danger-500 font-bold py-4 px-8 rounded-xl text-lg flex items-center justify-center gap-2"
               >
                 <X size={24} />
                 취소하기
@@ -135,20 +133,20 @@ export default function SOSPage() {
           ) : (
             <>
               {/* 발신 완료 */}
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6">
-                <CheckCircle2 size={48} className="text-secondary-500" />
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-5">
+                <CheckCircle2 size={40} className="text-secondary-500" />
               </div>
 
-              <h1 className="text-3xl font-bold mb-4">SOS 발신 완료</h1>
-              <p className="text-xl opacity-90 text-center mb-8">
+              <h1 className="text-2xl font-bold mb-3">SOS 발신 완료</h1>
+              <p className="text-lg opacity-90 text-center mb-6">
                 해경(122)과 주변 동료들에게<br />
                 긴급 구조 요청이 전송되었습니다
               </p>
 
               {/* 위치 정보 */}
-              <div className="w-full max-w-xs bg-white/20 rounded-xl p-4 mb-6">
+              <div className="w-full bg-white/20 rounded-xl p-4 mb-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <MapPin size={20} />
+                  <MapPin size={18} />
                   <span className="font-semibold">현재 위치</span>
                 </div>
                 <p className="text-sm opacity-80">
@@ -158,16 +156,16 @@ export default function SOSPage() {
               </div>
 
               {/* 연락처 */}
-              <div className="w-full max-w-xs space-y-3">
+              <div className="w-full space-y-3">
                 <a
                   href="tel:122"
-                  className="block w-full bg-white text-danger-500 font-bold py-4 rounded-xl text-center"
+                  className="block w-full bg-white text-danger-500 font-bold py-3 rounded-xl text-center"
                 >
-                  📞 해경 122 직접 연락
+                  해경 122 직접 연락
                 </a>
                 <button
                   onClick={() => router.push('/')}
-                  className="block w-full bg-white/20 text-white font-bold py-4 rounded-xl"
+                  className="block w-full bg-white/20 text-white font-bold py-3 rounded-xl"
                 >
                   홈으로 돌아가기
                 </button>
@@ -181,134 +179,131 @@ export default function SOSPage() {
 
   // 기본 SOS 화면
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col">
+    <div className="px-4 py-6">
       {/* 헤더 */}
-      <div className="p-4">
-        <button
-          onClick={() => router.back()}
-          className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white"
-        >
-          <ArrowLeft size={24} />
-        </button>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-navy-500">긴급 SOS</h1>
+        <p className="text-gray-500">위급 상황 시 구조 요청</p>
       </div>
 
-      {/* 메인 콘텐츠 */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
-        {/* SOS 버튼 */}
-        <div className="relative mb-8">
-          {/* 배경 링 */}
-          <div
-            className="absolute inset-0 rounded-full bg-danger-500/30 transition-all duration-100"
-            style={{
-              transform: `scale(${1 + holdProgress / 100})`,
-              opacity: isHolding ? 1 : 0,
-            }}
-          />
-
-          {/* 프로그레스 링 */}
-          <svg
-            className="absolute inset-0 -rotate-90"
-            width="192"
-            height="192"
-            viewBox="0 0 192 192"
-          >
-            <circle
-              cx="96"
-              cy="96"
-              r="90"
-              fill="none"
-              stroke="rgba(255,255,255,0.2)"
-              strokeWidth="8"
+      {/* SOS 버튼 영역 */}
+      <div className="bg-slate-900 rounded-2xl p-6 mb-6">
+        <div className="flex flex-col items-center">
+          {/* SOS 버튼 */}
+          <div className="relative mb-6">
+            {/* 배경 링 */}
+            <div
+              className="absolute inset-0 rounded-full bg-danger-500/30 transition-all duration-100"
+              style={{
+                transform: `scale(${1 + holdProgress / 100})`,
+                opacity: isHolding ? 1 : 0,
+              }}
             />
-            <circle
-              cx="96"
-              cy="96"
-              r="90"
-              fill="none"
-              stroke="#EF4444"
-              strokeWidth="8"
-              strokeDasharray={`${2 * Math.PI * 90}`}
-              strokeDashoffset={`${2 * Math.PI * 90 * (1 - holdProgress / 100)}`}
-              strokeLinecap="round"
-              className="transition-all duration-100"
-            />
-          </svg>
 
-          {/* 버튼 */}
-          <button
-            onMouseDown={handleHoldStart}
-            onMouseUp={handleHoldEnd}
-            onMouseLeave={handleHoldEnd}
-            onTouchStart={handleHoldStart}
-            onTouchEnd={handleHoldEnd}
-            className={`sos-btn relative z-10 ${isHolding ? 'scale-95' : ''}`}
-          >
-            <Phone size={48} className="mb-2" />
-            <span>SOS</span>
-          </button>
+            {/* 프로그레스 링 */}
+            <svg
+              className="absolute inset-0 -rotate-90"
+              width="160"
+              height="160"
+              viewBox="0 0 160 160"
+            >
+              <circle
+                cx="80"
+                cy="80"
+                r="74"
+                fill="none"
+                stroke="rgba(255,255,255,0.2)"
+                strokeWidth="6"
+              />
+              <circle
+                cx="80"
+                cy="80"
+                r="74"
+                fill="none"
+                stroke="#EF4444"
+                strokeWidth="6"
+                strokeDasharray={`${2 * Math.PI * 74}`}
+                strokeDashoffset={`${2 * Math.PI * 74 * (1 - holdProgress / 100)}`}
+                strokeLinecap="round"
+                className="transition-all duration-100"
+              />
+            </svg>
+
+            {/* 버튼 */}
+            <button
+              onMouseDown={handleHoldStart}
+              onMouseUp={handleHoldEnd}
+              onMouseLeave={handleHoldEnd}
+              onTouchStart={handleHoldStart}
+              onTouchEnd={handleHoldEnd}
+              className={`relative z-10 w-40 h-40 rounded-full bg-danger-500 text-white flex flex-col items-center justify-center shadow-lg transition-transform ${isHolding ? 'scale-95' : 'hover:scale-105'}`}
+            >
+              <Phone size={40} className="mb-1" />
+              <span className="text-2xl font-bold">SOS</span>
+            </button>
+          </div>
+
+          {/* 안내 텍스트 */}
+          <div className="text-center text-white">
+            <p className="text-lg font-semibold mb-1">
+              {isHolding ? '계속 누르세요...' : '3초간 꾹 누르세요'}
+            </p>
+            <p className="text-gray-400 text-sm">
+              긴급 상황 시 해경(122)과 동료에게<br />
+              구조 요청이 전송됩니다
+            </p>
+          </div>
         </div>
+      </div>
 
-        {/* 안내 텍스트 */}
-        <div className="text-center text-white mb-8">
-          <p className="text-xl font-semibold mb-2">
-            {isHolding ? '계속 누르세요...' : '3초간 꾹 누르세요'}
-          </p>
-          <p className="text-gray-400">
-            긴급 상황 시 해경(122)과 동료에게<br />
-            구조 요청이 전송됩니다
-          </p>
-        </div>
-
-        {/* 빠른 연락 */}
-        <div className="w-full max-w-sm space-y-3">
-          <a
-            href="tel:122"
-            className="flex items-center justify-between w-full bg-white/10 hover:bg-white/20 text-white p-4 rounded-xl transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
-                <Phone size={20} />
-              </div>
-              <div>
-                <p className="font-semibold">해경 122</p>
-                <p className="text-sm text-gray-400">해양 긴급 구조</p>
-              </div>
+      {/* 빠른 연락 */}
+      <div className="space-y-3 mb-6">
+        <h2 className="font-bold text-navy-500">빠른 연락</h2>
+        <a
+          href="tel:122"
+          className="flex items-center justify-between w-full bg-white border border-gray-200 p-4 rounded-xl"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+              <Phone size={20} className="text-primary-600" />
             </div>
-            <span className="text-primary-400">전화</span>
-          </a>
-
-          <a
-            href="tel:119"
-            className="flex items-center justify-between w-full bg-white/10 hover:bg-white/20 text-white p-4 rounded-xl transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-danger-500 rounded-full flex items-center justify-center">
-                <Phone size={20} />
-              </div>
-              <div>
-                <p className="font-semibold">119</p>
-                <p className="text-sm text-gray-400">응급 구조</p>
-              </div>
+            <div>
+              <p className="font-semibold text-navy-500">해경 122</p>
+              <p className="text-sm text-gray-500">해양 긴급 구조</p>
             </div>
-            <span className="text-danger-400">전화</span>
-          </a>
-        </div>
+          </div>
+          <span className="text-primary-500 font-medium">전화</span>
+        </a>
+
+        <a
+          href="tel:119"
+          className="flex items-center justify-between w-full bg-white border border-gray-200 p-4 rounded-xl"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-danger-100 rounded-full flex items-center justify-center">
+              <Phone size={20} className="text-danger-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-navy-500">119</p>
+              <p className="text-sm text-gray-500">응급 구조</p>
+            </div>
+          </div>
+          <span className="text-danger-500 font-medium">전화</span>
+        </a>
       </div>
 
       {/* 하단 안내 */}
-      <div className="p-6">
-        <div className="bg-white/10 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle size={20} className="text-warning-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-gray-300">
-              <p className="font-semibold text-white mb-1">SOS 발신 시 전송되는 정보</p>
-              <ul className="space-y-1">
-                <li>• 현재 GPS 위치 (위도/경도)</li>
-                <li>• 사용자 정보 (이름, 선박명)</li>
-                <li>• 출항 정보 (있는 경우)</li>
-                <li>• 등록된 동료 및 가족에게 알림</li>
-              </ul>
-            </div>
+      <div className="bg-warning-50 border border-warning-200 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <AlertTriangle size={20} className="text-warning-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-semibold text-warning-700 mb-1">SOS 발신 시 전송되는 정보</p>
+            <ul className="space-y-1 text-warning-600">
+              <li>• 현재 GPS 위치 (위도/경도)</li>
+              <li>• 사용자 정보 (이름, 선박명)</li>
+              <li>• 출항 정보 (있는 경우)</li>
+              <li>• 등록된 동료 및 가족에게 알림</li>
+            </ul>
           </div>
         </div>
       </div>
