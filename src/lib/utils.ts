@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(dateString: string): string {
+export function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
@@ -23,6 +23,31 @@ export function formatDate(dateString: string): string {
     month: 'long',
     day: 'numeric',
   });
+}
+
+export function formatDate(dateString: string, format?: string): string {
+  const date = new Date(dateString);
+
+  if (!format) {
+    return date.toLocaleDateString('ko-KR', {
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
+  // 간단한 포맷 파싱
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return format
+    .replace('yyyy', String(year))
+    .replace('MM', month)
+    .replace('dd', day)
+    .replace('HH', hours)
+    .replace('mm', minutes);
 }
 
 export function formatTime(dateString: string): string {
@@ -122,6 +147,10 @@ export function getRiskTypeIcon(type: string): string {
 
 export function getRiskTypeText(type: string): string {
   switch (type) {
+    case 'weather':
+      return '기상';
+    case 'sea_condition':
+      return '해상상태';
     case 'wave':
       return '파도';
     case 'wind':
@@ -130,6 +159,8 @@ export function getRiskTypeText(type: string): string {
       return '암초';
     case 'equipment':
       return '장비';
+    case 'obstacle':
+      return '장애물';
     case 'other':
       return '기타';
     default:
