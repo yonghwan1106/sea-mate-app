@@ -99,7 +99,7 @@ export default function TripsPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-navy-500">{trip.destination}</h3>
-                      <p className="text-sm text-gray-500">{trip.vessel.name}</p>
+                      <p className="text-sm text-gray-500">{trip.vessel?.name || '선박 미지정'}</p>
                     </div>
                   </div>
                   <span className={`badge ${statusConfig[trip.status].color}`}>

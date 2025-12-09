@@ -158,7 +158,7 @@ export default function AdminDashboardPage() {
                           <div>
                             <p className="font-medium text-navy-500">{user?.name}</p>
                             <p className="text-sm text-gray-500">
-                              {trip.destination} · {trip.vessel.name}
+                              {trip.destination}{trip.vessel ? ` · ${trip.vessel.name}` : ''}
                             </p>
                           </div>
                         </div>
@@ -257,7 +257,7 @@ export default function AdminDashboardPage() {
                             </div>
                             <div>
                               <p className="font-bold text-navy-500">{user?.name}</p>
-                              <p className="text-sm text-gray-500">{trip.vessel.name}</p>
+                              <p className="text-sm text-gray-500">{trip.vessel?.name || '선박 미지정'}</p>
                             </div>
                           </div>
                           <span className="badge badge-primary">운항 중</span>

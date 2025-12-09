@@ -183,7 +183,7 @@ export default function HomePage() {
                 <div className="flex-1">
                   <p className="font-semibold text-navy-500">{trip.destination}</p>
                   <p className="text-sm text-gray-500">
-                    {trip.vessel.name} · 체크인 {trip.checkins.length}회
+                    {trip.vessel?.name || '선박'} · 체크인 {trip.checkins.length}회
                   </p>
                 </div>
                 <span className="badge badge-primary">운항 중</span>

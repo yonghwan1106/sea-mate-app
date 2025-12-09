@@ -63,7 +63,7 @@ export default function BuddyPage() {
             <div className="flex-1">
               <p className="text-xl font-bold">{todayBuddy.name}</p>
               <p className="text-sm opacity-80">{todayBuddy.harbor.name}</p>
-              <p className="text-sm opacity-80">{todayBuddy.vessel.name}</p>
+              {todayBuddy.vessel && <p className="text-sm opacity-80">{todayBuddy.vessel.name}</p>}
             </div>
           </div>
           <div className="flex gap-2 mt-4">
@@ -124,7 +124,7 @@ export default function BuddyPage() {
                       </div>
                       <div className="flex-1">
                         <p className="font-semibold text-navy-500">{fisher?.name}</p>
-                        <p className="text-sm text-gray-500">{trip.vessel.name}</p>
+                        <p className="text-sm text-gray-500">{trip.vessel?.name || '선박 미지정'}</p>
                       </div>
                       <span className="badge badge-primary">운항 중</span>
                     </div>
@@ -214,7 +214,7 @@ export default function BuddyPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-navy-500">{buddy.name}</p>
-                    <p className="text-sm text-gray-500">{buddy.vessel.name}</p>
+                    <p className="text-sm text-gray-500">{buddy.vessel?.name || '선박 미지정'}</p>
                   </div>
                   <div className="flex gap-2">
                     <button className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600">
@@ -247,7 +247,7 @@ export default function BuddyPage() {
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold text-navy-500">{fisher.name}</p>
-                      <p className="text-sm text-gray-500">{fisher.harbor.name} · {fisher.vessel.name}</p>
+                      <p className="text-sm text-gray-500">{fisher.harbor.name}{fisher.vessel ? ` · ${fisher.vessel.name}` : ''}</p>
                     </div>
                     <ChevronRight size={20} className="text-gray-400" />
                   </div>

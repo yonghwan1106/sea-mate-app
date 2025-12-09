@@ -67,7 +67,7 @@ export default function TripDetailPage() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-navy-500">{trip.destination}</h2>
-            <p className="text-gray-500">{trip.vessel.name}</p>
+            <p className="text-gray-500">{trip.vessel?.name || '선박 미지정'}</p>
           </div>
         </div>
       </div>

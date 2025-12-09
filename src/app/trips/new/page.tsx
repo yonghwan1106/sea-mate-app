@@ -118,7 +118,7 @@ export default function NewTripPage() {
               </div>
               <div>
                 <p className="text-sm text-primary-600">내 선박</p>
-                <p className="font-bold text-navy-500">{user.vessel.name}</p>
+                <p className="font-bold text-navy-500">{user.vessel?.name || '선박 미지정'}</p>
                 <p className="text-sm text-gray-500">{user.harbor.name} 소속</p>
               </div>
             </div>

@@ -97,15 +97,17 @@ export default function ProfilePage() {
               <p className="font-medium text-navy-500">{user.harbor.name}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Ship size={18} className="text-gray-400" />
-            <div>
-              <p className="text-sm text-gray-500">선박</p>
-              <p className="font-medium text-navy-500">
-                {user.vessel.name} ({user.vessel.type})
-              </p>
+          {user.vessel && (
+            <div className="flex items-center gap-3">
+              <Ship size={18} className="text-gray-400" />
+              <div>
+                <p className="text-sm text-gray-500">선박</p>
+                <p className="font-medium text-navy-500">
+                  {user.vessel.name} ({user.vessel.type})
+                </p>
+              </div>
             </div>
-          </div>
+          )}
           {user.phone && (
             <div className="flex items-center gap-3">
               <Phone size={18} className="text-gray-400" />
