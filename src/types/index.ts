@@ -93,7 +93,7 @@ export interface Trip {
   userId: string;
   userName?: string;
   userAvatar?: string;
-  vessel: Vessel;
+  vessel?: Vessel;
   vesselName?: string;
   departureTime: string;
   expectedReturn: string;
