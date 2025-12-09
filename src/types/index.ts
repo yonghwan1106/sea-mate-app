@@ -123,7 +123,7 @@ export interface PointHistory {
 export interface SOSRequest {
   id: string;
   userId: string;
-visually: string;
+  userName: string;
   userPhone: string;
   vesselName: string;
   location: {
