@@ -33,9 +33,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="antialiased safe-area-inset">
+      <body className="antialiased bg-slate-900 text-white">
         {/* 메인 콘텐츠 영역 */}
-        <div className="min-h-screen pb-20">
+        <div className="min-h-screen pb-20 safe-area-inset">
           {children}
         </div>
 
