@@ -35,12 +35,12 @@ export type UserRole = 'fisher' | 'family' | 'admin' | 'crew';
 export interface User {
   id: string;
   name: string;
-  phone: string;
+  phone?: string;
   harbor: Harbor;
-  vessel?: Vessel;
+  vessel: Vessel;
   age: number;
-  healthConditions: string[];
-  emergencyContacts: EmergencyContact[];
+  healthConditions?: string[];
+  emergencyContacts?: EmergencyContact[];
   points: number;
   role: UserRole;
   avatarUrl?: string;
@@ -48,7 +48,7 @@ export interface User {
 }
 
 // 위험 유형
-export type RiskType = 'wave' | 'wind' | 'rock' | 'equipment' | 'other';
+export type RiskType = 'weather' | 'sea_condition' | 'wave' | 'wind' | 'rock' | 'equipment' | 'obstacle' | 'other';
 
 // 위험도
 export type Severity = 'low' | 'medium' | 'high' | 'critical';
@@ -56,16 +56,19 @@ export type Severity = 'low' | 'medium' | 'high' | 'critical';
 // 위험정보
 export interface RiskReport {
   id: string;
-  userId: string;
-  userName: string;
+  userId?: string;
+  userName?: string;
   userAvatar?: string;
+  author: User;
   type: RiskType;
   severity: Severity;
-  location: Location;
-  content: string;
-  mediaUrls: string[];
+  location: Harbor;
+  title: string;
+  description: string;
+  content?: string;
+  mediaUrls?: string[];
   createdAt: string;
-  expiresAt: string;
+  expiresAt?: string;
   likes: number;
   comments: number;
   isLiked?: boolean;
@@ -78,26 +81,29 @@ export type CheckinStatus = 'ok' | 'help' | 'missed';
 export interface Checkin {
   time: string;
   status: CheckinStatus;
-  location?: Location;
+  location?: string;
 }
 
 // 출항 상태
-export type TripStatus = 'preparing' | 'sailing' | 'returning' | 'completed' | 'sos' | 'overdue';
+export type TripStatus = 'scheduled' | 'preparing' | 'sailing' | 'returning' | 'completed' | 'cancelled' | 'sos' | 'overdue';
 
 // 출항 기록
 export interface Trip {
   id: string;
   userId: string;
-  userName: string;
+  userName?: string;
   userAvatar?: string;
-  vesselName: string;
+  vessel: Vessel;
+  vesselName?: string;
   departureTime: string;
   expectedReturn: string;
   actualReturn?: string | null;
-  destination: Location;
+  destination: string;
   status: TripStatus;
+  crewCount?: number;
   buddyId?: string;
   buddyName?: string;
+  notes?: string;
   checkins: Checkin[];
 }
 
@@ -162,7 +168,9 @@ export type NotificationType =
   | 'risk_alert'
   | 'sos_alert'
   | 'return_reminder'
+  | 'point_earn'
   | 'point_earned'
+  | 'trip_start'
   | 'family_update';
 
 // 알림
